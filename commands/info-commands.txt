@@ -1,0 +1,4 @@
+!sounds
+!game
+!info
+!banme
