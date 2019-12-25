@@ -1,10 +1,11 @@
+// requirements
 const tmi = require('tmi.js');
 const player = require('play-sound')(opts = {});
 const fs = require('fs');
 const shell = require('shelljs');
-const { channel } = require('./auths/bot.js');
-const { bot_username } = require('./auths/bot.js');
-const { bot_password } = require('./auths/bot.js');
+const { channel } = require('./auths/bot.js'); // module.exports.channel = "<channel>"
+const { bot_username } = require('./auths/bot.js'); // module.exports.bot_username = "<username>"
+const { bot_password } = require('./auths/bot.js'); // module.exports.bot_password = "<password>"
 
 const options = {
 	options: {
@@ -30,13 +31,13 @@ const client = new tmi.client(options);
 client.connect();
 
 // for testing
-client.on('connected', (address, port) => {
-	client.action(channel, 'is connected')
-});
+// client.on('connected', (address, port) => {
+// 	client.action(channel, 'is connected')
+// });
 
-client.on('disconnected', (reason) => {
-	client.action(channel, 'is disconnected')
-});
+// client.on('disconnected', (reason) => {
+// 	client.action(channel, 'is disconnected')
+// });
 
 // Update sound commands list (turn off when testing)
 shell.exec('./commands/list-all-sounds.sh');
@@ -49,7 +50,7 @@ client.on('chat', (channel, user, message, self) => {
 		client.say(channel, 'Bloodborne');
 	}
 
-	if (message.includes('youtube.com')) {
+	if (message.includes('youtube.com') || message.includes('youtu.be')) {
 		client.say(channel, 'a hui, net songrequesta poka :)');
 	}
 
@@ -59,13 +60,12 @@ client.on('chat', (channel, user, message, self) => {
 		});
 	}
 
-// to investigate
 	if (message === '!banme') {
-		client.ban(channel, `user['display-name'], ty dolbaeb?)`)
+		client.say(channel, user['display-name'] + ", ty dolbaeb?)")
 	}
-// to investigate
+
 	if (message === '!info') {
-		client.ban(channel, "а тут нихуя :)")
+		client.say(channel, "а тут нихуя :)")
 	}
 
 // for testing
@@ -89,11 +89,6 @@ client.on('chat', (channel, user, message, self) => {
 	
 	if (self) return;
 
-	if (message === '!joji') {
-		player.play('./sound-commands/joji.mp3', function(err){
-		  if (err) throw err
-		});	
-	};
 
 	if (message === '!казино') {
 		player.play('./sound-commands/казино.mp3', function(err){
@@ -124,7 +119,6 @@ client.on('chat', (channel, user, message, self) => {
 		  if (err) throw err
 		});	
 	};
-	
 	
 	if (message === '!shoulder') {
 		player.play('./sound-commands/shoulder.mp3', function(err){
@@ -162,8 +156,8 @@ client.on('chat', (channel, user, message, self) => {
 		});	
 	};
 
-	if (message === '!aaaaaahh') {
-		player.play('./sound-commands/aaaaaahh.mp3', function(err){
+	if (message === '!aahh') {
+		player.play('./sound-commands/aahh.mp3', function(err){
 		  if (err) throw err
 		});	
 	};		
