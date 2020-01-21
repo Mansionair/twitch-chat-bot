@@ -1,4 +1,6 @@
 auths/
+test/
 node_modules/
+.vscode/
 README.pdf
 README.html

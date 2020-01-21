@@ -1,4 +1,9 @@
-!sounds
-!game
-!info
-!banme
+!commands,
+!banme,
+!info,
+!sounds,
+!time,
+!uptime,
+!followage,
+!van,
+!van2
