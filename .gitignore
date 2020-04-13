@@ -1,4 +1,4 @@
-auths/
+config/
 test/
 node_modules/
 .vscode/
