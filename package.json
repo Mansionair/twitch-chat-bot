@@ -4,9 +4,8 @@
   "description": "Bot for a twitch chat",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
-    "dev": "nodemon index",
-    "test": "nodemon test/test.js"
+    "start": "NODE_ENV=default node index",
+    "dev": "NODE_ENV=dev nodemon index"
   },
   "repository": {
     "type": "git",
@@ -18,15 +17,13 @@
     "twitchbot"
   ],
   "author": "Sultan Momynov <momynov.sultan@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ExistentialMisery/twitch-chat-bot/issues"
   },
   "homepage": "https://github.com/ExistentialMisery/twitch-chat-bot#readme",
   "dependencies": {
-    "axios": "^0.19.1",
-    "fetch": "^1.1.0",
-    "fs": "0.0.1-security",
+    "config": "^3.3.1",
     "node-fetch": "^2.6.0",
     "play-sound": "^1.1.3",
     "shelljs": "^0.8.3",

@@ -1,12 +1,14 @@
-// requirements
 const tmi = require('tmi.js');
 const player = require('play-sound')(opts = {});
 const fs = require('fs');
 const shell = require('shelljs');
 const fetch = require('node-fetch')
-const { channel } = require('./auths/bot.js'); // module.exports.channel = "<channel>"
-const { bot_username } = require('./auths/bot.js'); // module.exports.bot_username = "<username>"
-const { bot_password } = require('./auths/bot.js'); // module.exports.bot_password = "<password>"
+const config = require('config')
+
+
+const channel = config.get('channel')
+const username = config.get('username')
+const token = config.get('token')
 
 
 const options = {
@@ -18,8 +20,8 @@ const options = {
 		reconnect: true,
 	},
 	identity: {
-		username: bot_username,
-		password: bot_password,
+		username: username,
+		password: token,
 	},
 	channels: [
 		channel
@@ -79,15 +81,16 @@ client.on('chat', (channel, user, message, self) => {
 			break;
 
 		case 'uptime':
-			const url = `my name is ${user['display-name']}` 
-			const uptimePromise = fetch(`http://beta.decapi.me/twitch/uptime/${myChannel}`).then(data => data.text());
+			const uptimePromise = fetch(`http://beta.decapi.me/twitch/uptime/${myChannel}`)
+				.then(data => data.text());
 			uptimePromise.then(out => {
 				client.say(channel, out);
 			})
 			break;
 
 		case 'followage':
-			const followagePromise = fetch(`http://beta.decapi.me/twitch/followage/${myChannel}/${user['display-name']}`).then(data => data.text());
+			const followagePromise = fetch(`http://beta.decapi.me/twitch/followage/${myChannel}/${user['display-name']}`)
+				.then(data => data.text());
 			followagePromise.then(out => {
 				if (out === 'Follow not found') {
 					let followage = 'You are not a follower'
