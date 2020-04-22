@@ -1,20 +1,17 @@
 const tmi = require('tmi.js');
 const player = require('play-sound')(opts = {});
 const fs = require('fs');
-const shell = require('shelljs');
-const fetch = require('node-fetch')
 const config = require('config')
-
+const utils = require('./utils/index')
 
 const channel = config.get('channel')
 const username = config.get('username')
 const token = config.get('token')
 
+const sounds_dir = './sound-commands/'
+const pastas_dir = './commands/pastas/'
 
 const options = {
-	options: {
-		debug: true,
-	},
 	connection: {
 		cluster: 'aws',
 		reconnect: true,
@@ -30,150 +27,80 @@ const options = {
 
 const client = new tmi.client(options);
 
+client.connect()
+client.on("connecting", () => console.log('Connecting...'));
+client.on("connected", () => console.log('Connected.'))
 
-client.connect();
+const PREFIX = '!'
 
+const soundsArray = utils.getFileNamesArray(sounds_dir)
+const pastasArray = utils.getFileNamesArray(pastas_dir)
 
-// Updates sound commands list
-shell.exec('./commands/list-all-sounds.sh');
-
-
-PREFIX = '!'
-
-
-client.on('chat', (channel, user, message, self) => {
+client.on('message', (channel, user, message, self) => {
 
 	let args = message.substring(PREFIX.length).split(" ");
-	let myChannel = channel.substr(1); // because for some reason 'channel' has a '#' in the beginning of a string
+	let msg = args[0]
 
-	if (self) return;
+	if (self) return
 
-	switch (args[0]) {
+	// sound commands
+	if (soundsArray.includes(msg)) {
+		player.play(`./sound-commands/${ msg }.mp3`, err => {
+			if (err) throw err
+		})
+	}
 
-		////////////////// Info commands //////////////////
+	// pastas
+	if (pastasArray.includes(msg)) {
+		utils.getPasta(msg)
+			.then(data => {
+				client.say(channel, data);
+			})
+	}
+
+	// info commands
+	switch (msg) {
 
 		case 'commands':
+			// to improve..
 			fs.readFile('./commands/info-commands.txt', 'utf8', function (err, info_commands) {
-				client.say(channel, `Available commands: ${info_commands}`)
-			});
+				if (err) return console.error('ERROR' + err)
+				client.say(channel, `Available commands: ${ info_commands }`)
+			})
 			break;
 
 		case 'banme':
-			client.action(channel, user['display-name'] + " is permanently banned")
-			break;
-
-		case 'info':
-			client.say(channel, "а тут нихуя :)")
+			client.action(channel, `${ user['display-name'] } is permanently banned`)
 			break;
 
 		case 'sounds':
-			fs.readFile('./commands/sound-commands.txt', 'utf8', function (err, sound_commands_list) {
-				client.say(channel, `Available sound commands: ${sound_commands_list}`)
-			});
+			utils.getFileNamesMessage(sounds_dir).then((data) => {
+				client.say(channel, `Available sound commands: ${ data }`)
+			})
 			break;
 
 		case 'time':
-			let date = new Date();
-			let hours = ("0" + date.getHours()).slice(-2);
-			let minutes = ("0" + date.getMinutes()).slice(-2);
-			let time = hours + ':' + minutes;
-			client.say(channel, `Current time: ${time} (GMT+6)`);
+			client.say(channel, `Current time: ${ utils.getDate() } (GMT+6)`);
 			break;
 
 		case 'uptime':
-			const uptimePromise = fetch(`http://beta.decapi.me/twitch/uptime/${myChannel}`)
-				.then(data => data.text());
-			uptimePromise.then(out => {
-				client.say(channel, out);
-			})
+			utils.getUptime()
+				.then(data => {
+					client.say(channel, data)
+				})
 			break;
 
 		case 'followage':
-			const followagePromise = fetch(`http://beta.decapi.me/twitch/followage/${myChannel}/${user['display-name']}`)
-				.then(data => data.text());
-			followagePromise.then(out => {
-				if (out === 'Follow not found') {
-					let followage = 'You are not a follower'
-					client.say(channel, followage);
-				} else {
-					let followage = `You have been following for ${out}`
-					client.say(channel, followage);
-				}
+			utils.getFollowAge(user)
+				.then(data => {
+					client.say(channel, data)
+				})
+			break;
+
+		case 'pastas':
+			utils.getFileNamesMessage(pastas_dir).then((data) => {
+				client.say(channel, `Available pastas: ${ data }`)
 			})
-			break;
-
-
-		////////////////// Sound commands //////////////////
-
-		case 'казино':
-			player.play('./sound-commands/казино.mp3');
-			break;
-
-		case 'заново':
-			player.play('./sound-commands/заново.mp3');
-			break;
-
-		case 'тыкто':
-			player.play('./sound-commands/тыкто.mp3');
-			break;
-
-		case 'скучно':
-			player.play('./sound-commands/скучно.mp3');
-			break;
-
-		case 'cmon':
-			player.play('./sound-commands/cmon.mp3');
-			break;
-
-		case 'slaves':
-			player.play('./sound-commands/slaves.mp3');
-			break;
-
-		case 'outfit':
-			player.play('./sound-commands/outfit.mp3');
-			break;
-
-		case 'shoulder':
-			player.play('./sound-commands/shoulder.mp3');
-			break;
-
-		case 'imsorry':
-			player.play('./sound-commands/imsorry.mp3');
-			break;
-
-		case 'spank':
-			player.play('./sound-commands/spank.mp3');
-			break;
-
-		case 'takeitboy':
-			player.play('./sound-commands/takeitboy.mp3');
-			break;
-
-		case 'thankyousir':
-			player.play('./sound-commands/thankyousir.mp3');
-			break;
-
-		case 'amazing':
-			player.play('./sound-commands/amazing.mp3');
-			break;
-
-		case 'aahh':
-			player.play('./sound-commands/aahh.mp3');
-			break;
-
-
-		////////////////// Copypastas //////////////////
-
-		case 'van':
-			fs.readFile('./commands/pastas/van.txt', 'utf8', function (err, van) {
-				client.say(channel, van);
-			});
-			break;
-
-		case 'van2':
-			fs.readFile('./commands/pastas/van2.txt', 'utf8', function (err, van2) {
-				client.say(channel, van2);
-			});
 			break;
 	}
 })
